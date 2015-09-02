@@ -1,0 +1,4 @@
+.vagrant/
+log/
+user-data.master
+user-data.slave

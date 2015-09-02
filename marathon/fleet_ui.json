@@ -1,0 +1,26 @@
+{
+  "id": "fleet-ui",
+  "cpus": 0.2,
+  "mem": 64.0,
+  "instances": 1,
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "purpleworks/fleet-ui",
+      "network": "BRIDGE",
+      "portMappings": [
+        {"containerPort": 3000, "servicePort": 0}
+      ]
+    }
+  },
+  "healthChecks": [
+    {
+      "protocol": "HTTP",
+      "portIndex": 0,
+      "path": "/",
+      "gracePeriodSeconds": 5,
+      "intervalSeconds": 20,
+      "maxConsecutiveFailures": 3
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+[Unit]
+Description=%p %i
+
+Requires=docker.service
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+
+KillMode=none
+
+Restart=always
+RestartSec=10s
+
+EnvironmentFile=/etc/environment
+
+Environment="SERVICE_NAME=%p_%i"
+Environment="SERVICE_IMAGE_URL=gliderlabs/registrator:latest"
+
+ExecStartPre=-/usr/bin/docker kill $SERVICE_NAME
+ExecStartPre=-/usr/bin/docker rm $SERVICE_NAME
+ExecStartPre=/usr/bin/docker pull $SERVICE_IMAGE_URL
+
+ExecStart=/usr/bin/docker run --rm \
+  --name=${SERVICE_NAME} \
+  --net=host \
+  --volume=/var/run/docker.sock:/tmp/docker.sock \
+  ${SERVICE_IMAGE_URL} \
+  -ip ${COREOS_PRIVATE_IPV4} \
+  etcd://${COREOS_PRIVATE_IPV4}:4001/services
+
+ExecStop=/usr/bin/docker stop $SERVICE_NAME
+
+[X-Fleet]
+Global=true
+MachineMetadata=type=slave

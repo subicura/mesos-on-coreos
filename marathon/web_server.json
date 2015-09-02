@@ -1,0 +1,26 @@
+{
+  "id": "who-am-i-web",
+  "cpus": 0.2,
+  "mem": 64.0,
+  "instances": 3,
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "subicura/whoami",
+      "network": "BRIDGE",
+      "portMappings": [
+        {"containerPort": 80, "servicePort": 0}
+      ]
+    }
+  },
+  "healthChecks": [
+    {
+      "protocol": "HTTP",
+      "portIndex": 0,
+      "path": "/",
+      "gracePeriodSeconds": 5,
+      "intervalSeconds": 20,
+      "maxConsecutiveFailures": 3
+    }
+  ]
+}

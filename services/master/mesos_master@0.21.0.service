@@ -1,0 +1,40 @@
+[Unit]
+Description=%p %i
+
+Requires=docker.service
+After=docker.service
+Requires=zookeeper@3.4.5.service
+After=zookeeper@3.4.5.service
+
+[Service]
+TimeoutStartSec=0
+
+KillMode=none
+
+Restart=always
+RestartSec=10s
+
+EnvironmentFile=/etc/environment
+
+Environment="SERVICE_NAME=%p_%i"
+Environment="SERVICE_IMAGE_URL=redjack/mesos-master:0.21.0"
+
+ExecStartPre=-/usr/bin/docker kill $SERVICE_NAME
+ExecStartPre=-/usr/bin/docker rm $SERVICE_NAME
+ExecStartPre=/usr/bin/docker pull $SERVICE_IMAGE_URL
+
+ExecStart=/usr/bin/docker run --rm \
+  --name=${SERVICE_NAME} \
+  --net=host \
+  --privileged \
+  -e MESOS_IP=${COREOS_PRIVATE_IPV4} \
+  -e MESOS_ZK=zk://${COREOS_PRIVATE_IPV4}:2181/mesos \
+  -e MESOS_QUORUM=1 \
+  -e MESOS_WORK_DIR=/var/lib/mesos \
+  -e MESOS_LOG_DIR=/var/log \
+  ${SERVICE_IMAGE_URL}
+
+ExecStop=/usr/bin/docker stop $SERVICE_NAME
+
+[X-Fleet]
+MachineMetadata=type=master

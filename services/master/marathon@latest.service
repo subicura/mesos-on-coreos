@@ -1,0 +1,38 @@
+[Unit]
+Description=%p %i
+
+Requires=docker.service
+After=docker.service
+Requires=mesos_master@0.21.0.service
+After=mesos_master@0.21.0.service
+
+[Service]
+TimeoutStartSec=0
+
+KillMode=none
+
+Restart=always
+RestartSec=10s
+
+EnvironmentFile=/etc/environment
+
+Environment="SERVICE_NAME=%p_%i"
+Environment="SERVICE_IMAGE_URL=mesosphere/marathon"
+
+ExecStartPre=-/usr/bin/docker kill $SERVICE_NAME
+ExecStartPre=-/usr/bin/docker rm $SERVICE_NAME
+ExecStartPre=/usr/bin/docker pull $SERVICE_IMAGE_URL
+
+ExecStart=/usr/bin/docker run --rm \
+  --name=${SERVICE_NAME} \
+  --net=host \
+  --privileged \
+  -e LIBPROCESS_PORT=9090 \
+  -e HOSTNAME=${COREOS_PRIVATE_IPV4} \
+  ${SERVICE_IMAGE_URL} \
+  --master zk://${COREOS_PRIVATE_IPV4}:2181/mesos --zk zk://${COREOS_PRIVATE_IPV4}:2181/marathon
+
+ExecStop=/usr/bin/docker stop $SERVICE_NAME
+
+[X-Fleet]
+MachineMetadata=type=master

@@ -1,0 +1,7 @@
+{
+    "id": "echo-test", 
+    "cmd": "while [ true ] ; do echo 'Hello Marathon' ; sleep 2 ; done",
+    "cpus": 0.1,
+    "mem": 10.0,
+    "instances": 1
+}
